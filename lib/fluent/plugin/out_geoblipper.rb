@@ -9,6 +9,7 @@ class Fluent::GeoBlipperOutput < Fluent::BufferedOutput
 
   config_param :pubnub_channel, :string
   config_param :pubnub_publish_key, :string
+  config_param :pubnub_subscribe_key, :string
   config_param :geodata_location, :string
   config_param :max_entries, :integer, :default => -1
   config_param :ip_key, :string, :default => 'ip'
@@ -16,13 +17,14 @@ class Fluent::GeoBlipperOutput < Fluent::BufferedOutput
   def start
     super
     @geodata = GeoIP.new(@geodata_location)
-    @pubnub = Pubnub.new( publish_key: @pubnub_publish_key )
+    @pubnub = Pubnub.new( publish_key: @pubnub_publish_key, subscribe_key: @pubnub_subscribe_key )
   end
 
   def format(tag, time, record)
     address = record[@ip_key]
     loc = @geodata.city(address)
-    {latitude: loc.latitude, longitude: loc.longitude}.to_json + "\n"
+
+    {latitude: loc.latitude, longitude: loc.longitude}.to_json + "\n" if loc
   end
 
   def write(chunk)
