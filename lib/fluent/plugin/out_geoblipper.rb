@@ -23,15 +23,18 @@ class Fluent::GeoBlipperOutput < Fluent::BufferedOutput
   def format(tag, time, record)
     address = record[@ip_key]
     loc = @geodata.city(address)
-
-    {latitude: loc.latitude, longitude: loc.longitude}.to_json + "\n" if loc
+    if loc
+      {latitude: loc.latitude, longitude: loc.longitude}.to_json + "\n"
+    else
+      ""
+    end
   end
 
   def write(chunk)
     chunk.open do |io|
-      items = chunk.split("\n")
+      items = io.read.split("\n")
       entries = items.slice(0..@max_entries).map {|item| JSON.parse(item) }
-      @pubnub.publish(message: entries, channel: @pubnub_channel)
+      @pubnub.publish(http_sync: true, message: entries, channel: @pubnub_channel)
     end
   end
 end
