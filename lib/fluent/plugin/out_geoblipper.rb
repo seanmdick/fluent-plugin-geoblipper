@@ -27,7 +27,7 @@ class Fluent::GeoBlipperOutput < Fluent::BufferedOutput
     if loc
       {latitude: loc.latitude, longitude: loc.longitude}.to_json + "\n"
     else
-      ""
+       Fluent::Engine.emit('debug.livemap', {message: "ipdata not found for #{@ip_key}"}
     end
   end
 
