@@ -17,7 +17,7 @@ class Fluent::GeoBlipperOutput < Fluent::BufferedOutput
   def start
     super
     @geodata = GeoIP.new(@geodata_location)
-    @pubnub = Pubnub.new( publish_key: @pubnub_publish_key, subscribe_key: @pubnub_subscribe_key )
+    @pubnub = Pubnub.new( publish_key: @pubnub_publish_key, subscribe_key: @pubnub_subscribe_key, logger: Logger.new(STDOUT) )
   end
 
   def format(tag, time, record)
