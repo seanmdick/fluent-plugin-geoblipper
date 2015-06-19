@@ -13,7 +13,6 @@ class Fluent::GeoBlipperOutput < Fluent::BufferedOutput
   config_param :geodata_location, :string
   config_param :max_entries, :integer, :default => -1
   config_param :ip_key, :string, :default => 'ip'
-  config_param :extra_capture, :array, :default => []
 
   def start
     super
@@ -25,11 +24,8 @@ class Fluent::GeoBlipperOutput < Fluent::BufferedOutput
     address = record[@ip_key]
     loc = @geodata.city(address)
     extra = {}
-    extra_capture.each do |key|
-      extra[key] = record[key]
-    end
     if loc
-      {latitude: loc.latitude, longitude: loc.longitude}.merge(extra).to_json + "\n"
+      {latitude: loc.latitude, longitude: loc.longitude}.to_json + "\n"
     else
       ""
     end
