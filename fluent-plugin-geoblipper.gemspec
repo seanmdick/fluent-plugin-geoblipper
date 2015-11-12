@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 Gem::Specification.new do |gem|
   gem.name        = "fluent-plugin-geoblipper"
-  gem.version     = "0.0.4.2"
+  gem.version     = "0.0.4.5"
   gem.authors     = ["Sean Dick", "Change.org"]
   gem.email       = ["sean@change.org"]
   gem.homepage    = "https://github.com/seanmdick/fluent-plugin-geoblipper"

@@ -13,6 +13,7 @@ class Fluent::GeoBlipperOutput < Fluent::BufferedOutput
   config_param :geodata_location, :string
   config_param :max_entries, :integer, :default => -1
   config_param :ip_key, :string, :default => 'ip'
+  config_param :debug, :boolean, :default => false
 
   def start
     super
@@ -21,13 +22,14 @@ class Fluent::GeoBlipperOutput < Fluent::BufferedOutput
   end
 
   def format(tag, time, record)
-    address = record[@ip_key]
+    address = record.delete(@ip_key)
     loc = @geodata.city(address)
     extra = {}
     if loc
-      {latitude: loc.latitude, longitude: loc.longitude}.to_json + "\n"
+      record.merge({latitude: loc.latitude, longitude: loc.longitude}).to_json + "\n"
     else
        Fluent::Engine.emit('debug.livemap', Time.now, {message: "geodata not found for #{address}"})
+       ''
     end
   end
 
@@ -36,7 +38,11 @@ class Fluent::GeoBlipperOutput < Fluent::BufferedOutput
       items = io.read.split("\n")
       entries = items.slice(0..@max_entries).map {|item| JSON.parse(item) }
       unless entries.empty?
-        @pubnub.publish(http_sync: true, message: entries, channel: @pubnub_channel)
+        unless @debug
+          @pubnub.publish(http_sync: true, message: entries, channel: @pubnub_channel)
+        else
+          Fluent::Engine.emit('debug.pubnub', Time.now, {message: entries, channel: @pubnub_channel})
+        end
       end
     end
   end
