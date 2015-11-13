@@ -13,7 +13,7 @@ class Fluent::GeoBlipperOutput < Fluent::BufferedOutput
   config_param :geodata_location, :string
   config_param :max_entries, :integer, :default => -1
   config_param :ip_key, :string, :default => 'ip'
-  config_param :debug, :boolean, :default => false
+  config_param :debug, :bool, :default => false
 
   def start
     super
