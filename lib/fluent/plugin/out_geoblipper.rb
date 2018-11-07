@@ -7,6 +7,11 @@ class Fluent::GeoBlipperOutput < Fluent::BufferedOutput
     require 'pubnub'
   end
 
+  # Define `router` method of v0.12 to support v0.10 or earlier
+  unless method_defined?(:router)
+    define_method("router") { Fluent::Engine }
+  end
+
   config_param :pubnub_channel, :string
   config_param :pubnub_publish_key, :string
   config_param :pubnub_subscribe_key, :string
@@ -28,7 +33,7 @@ class Fluent::GeoBlipperOutput < Fluent::BufferedOutput
     if loc
       record.merge({latitude: loc.latitude, longitude: loc.longitude}).to_json + "\n"
     else
-       Fluent::Engine.emit('debug.livemap', Time.now, {message: "geodata not found for #{address}"})
+       router.emit('debug.livemap', Time.now, {message: "geodata not found for #{address}"})
        ''
     end
   end
@@ -41,7 +46,7 @@ class Fluent::GeoBlipperOutput < Fluent::BufferedOutput
         unless @debug
           @pubnub.publish(http_sync: true, message: entries, channel: @pubnub_channel)
         else
-          Fluent::Engine.emit('debug.pubnub', Time.now, {message: entries, channel: @pubnub_channel})
+          router.emit('debug.pubnub', Time.now, {message: entries, channel: @pubnub_channel})
         end
       end
     end
